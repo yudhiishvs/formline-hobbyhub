@@ -73,7 +73,7 @@ The [three-minute Demo Day outline](docs/demo-day.md) follows the GIF's feature 
 
 - [x] Feature checklist and GIF walkthrough are included.
 - [x] Work is committed in milestones.
-- [ ] Push this project to a **private** GitHub repository.
+- [x] Push this project to a **private** GitHub repository.
 - [ ] Add `codepathreview` as a collaborator on that private repository.
 - [ ] Submit the repository through the course portal.
 
