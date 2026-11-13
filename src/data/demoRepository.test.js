@@ -57,6 +57,15 @@ describe('browser demo repository', () => {
     expect(await repository.listComments('missing')).toEqual([])
   })
 
+  it('resets incomplete rows before the feed or comments render', async () => {
+    localStorage.setItem('formline.posts.v1', JSON.stringify([{ id: 'partial-post' }]))
+    localStorage.setItem('formline.comments.v1', JSON.stringify([{ id: 'partial-comment' }]))
+    const repository = makeRepository()
+    await repository.initialize()
+    expect(await repository.listPosts()).toHaveLength(3)
+    expect(await repository.listComments('sample-proportions')).toEqual([])
+  })
+
   it('rejects actions for a missing post or empty comment', async () => {
     const repository = makeRepository()
     await repository.initialize()

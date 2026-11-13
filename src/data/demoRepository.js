@@ -38,7 +38,23 @@ function samplePosts(timestamp) {
   }))
 }
 
-function readRows(storage, key, fallback) {
+const isDateString = (value) => typeof value === 'string' && !Number.isNaN(Date.parse(value))
+
+function isPost(row) {
+  return row && typeof row.id === 'string' && typeof row.user_id === 'string'
+    && typeof row.title === 'string' && typeof row.body === 'string'
+    && (row.image_url === null || typeof row.image_url === 'string')
+    && Number.isInteger(row.upvotes) && row.upvotes >= 0
+    && isDateString(row.created_at) && isDateString(row.updated_at)
+}
+
+function isComment(row) {
+  return row && typeof row.id === 'string' && typeof row.post_id === 'string'
+    && typeof row.user_id === 'string' && typeof row.body === 'string'
+    && isDateString(row.created_at)
+}
+
+function readRows(storage, key, fallback, isValidRow) {
   const raw = storage.getItem(key)
   if (raw === null) {
     storage.setItem(key, JSON.stringify(fallback))
@@ -46,7 +62,7 @@ function readRows(storage, key, fallback) {
   }
   try {
     const parsed = JSON.parse(raw)
-    if (Array.isArray(parsed) && parsed.every((row) => row && typeof row.id === 'string')) return parsed
+    if (Array.isArray(parsed) && parsed.every(isValidRow)) return parsed
   } catch { /* Reset malformed browser data below. */ }
   storage.setItem(key, JSON.stringify(fallback))
   return fallback
@@ -57,8 +73,8 @@ export function createDemoRepository({
   now = () => new Date().toISOString(),
   newId = () => globalThis.crypto.randomUUID(),
 } = {}) {
-  const readPosts = () => readRows(storage, POSTS_KEY, samplePosts(now()))
-  const readComments = () => readRows(storage, COMMENTS_KEY, [])
+  const readPosts = () => readRows(storage, POSTS_KEY, samplePosts(now()), isPost)
+  const readComments = () => readRows(storage, COMMENTS_KEY, [], isComment)
   const savePosts = (rows) => storage.setItem(POSTS_KEY, JSON.stringify(rows))
   const saveComments = (rows) => storage.setItem(COMMENTS_KEY, JSON.stringify(rows))
 
